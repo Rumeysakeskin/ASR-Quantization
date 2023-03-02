@@ -53,3 +53,5 @@ Reference pages:
 - [pytorch quantization](https://pytorch.org/docs/stable/quantization.html)
 
 - [pytorch quantization in practice](https://pytorch.org/blog/quantization-in-practice/)
+
+- [pytorch fuse](https://pytorch.org/tutorials/recipes/fuse.html)
