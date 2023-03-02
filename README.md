@@ -15,24 +15,41 @@ The weights and activations are quantized into lower precision only for inferenc
 PTQ focuses on quantize the fine-tuned model without retraining. 
 The weights and activations of ops are converted into lower precision for saving the memory and computation losses.
 
-In this project, Post Training Static Quantization quantizes the weights and activations of the model. 
-It fuses activations into preceding layers where possible. 
-It requires calibration with a representative dataset to determine optimal quantization parameters for activations. 
-Post Training Static Quantization is typically used when both memory bandwidth and compute savings are important with CNNs being a typical use case. 
+---
+In this project, Post Training Static Quantization quantizes both weights and activations of the model statically. 
+Follow below steps to aplly post training static quantization.
 
-### Choose a Quantization Backend for Hardware
+ - Pre-trained Model
+ - Prepare
+ - Fuse Modules
+ - Insert Stubs and Observers
+ - Calibration
+ - Quantization
+ 
+### Prepare Quantization Backend for Hardware
 PyTorch currently has two quantization backends that support quantization.
 - FBGEMM is specific to x86 CPUs and is intended for deployments of quantized models on server CPUs.
 - QNNPACK has a range of targets that includes ARM CPUs (typically found in mobile/embedded devices).
 
-### Apply torch.quantization.QuantStub() and torch.quantization.QuantStub() to the inputs and outputs
 ```python
-# Insert the QuantStub() before the first layer of the model
-first_asr_model.quant = torch.quantization.QuantStub()
-first_asr_model.encoder.quant = torch.quantization.QuantStub()
-
-# Insert a DeQuantStub() at the end of the model
-first_asr_model.dequant = torch.quantization.DeQuantStub()
-first_asr_model.decoder.dequant = torch.quantization.DeQuantStub()
+model.qconfig = torch.quantization.get_default_qconfig('qnnpack')
+torch.quantization.prepare(first_asr_model, inplace=True)
 ```
 
+### Insert Stubs to the inputs and outputs
+```python
+# Insert the QuantStub() before the first layer of the model
+model.quant = torch.quantization.QuantStub()
+model.encoder.quant = torch.quantization.QuantStub()
+
+# Insert a DeQuantStub() at the end of the model
+model.dequant = torch.quantization.DeQuantStub()
+model.decoder.dequant = torch.quantization.DeQuantStub()
+```
+
+
+Reference pages:
+
+- [pytorch quantization](https://pytorch.org/docs/stable/quantization.html)
+
+- [pytorch quantization in practice](https://pytorch.org/blog/quantization-in-practice/)
